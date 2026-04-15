@@ -1,5 +1,5 @@
 {
-  "name": "slot-machine",
+  "name": "cosmis-gems",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,7 @@
     "start": "pnpm --filter backend start"
   },
   "devDependencies": {
+    "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   }
 }

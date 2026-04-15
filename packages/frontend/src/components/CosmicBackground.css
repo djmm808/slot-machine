@@ -1,0 +1,139 @@
+.cosmic-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Shooting Stars */
+.shooting-star {
+  position: absolute;
+  width: 80px;
+  height: 16px;
+  animation: shooting-star 4s linear infinite;
+  opacity: 0;
+  --rotation: -45deg;
+  --end-x: 100%;
+  --end-y: 100%;
+}
+
+.shooting-star-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes shooting-star {
+  0% {
+    transform: rotate(var(--rotation));
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: var(--end-x);
+    top: var(--end-y);
+    transform: rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+/* Floating Planets */
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent),
+              radial-gradient(circle at 70% 70%, rgba(124, 77, 255, 0.3), transparent),
+              radial-gradient(circle, rgba(100, 100, 200, 0.15), transparent);
+  box-shadow: 0 0 20px rgba(124, 77, 255, 0.2),
+              inset 0 -8px 16px rgba(0, 0, 0, 0.2);
+  animation: float 10s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-15px) scale(1.01);
+  }
+}
+
+/* UFOs */
+.ufo {
+  position: absolute;
+  width: 40px;
+  height: 26px;
+  animation: ufo-travel linear infinite;
+  opacity: 0.7;
+  --end-x: 100%;
+  --end-y: 100%;
+  --rotation: 0deg;
+}
+
+.ufo-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes ufo-travel {
+  0% {
+    transform: rotate(var(--rotation));
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    left: var(--end-x);
+    top: var(--end-y);
+    transform: rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+/* Pulsing Galaxies */
+.galaxy {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(224, 64, 251, 0.12), rgba(124, 77, 255, 0.08), transparent);
+  filter: blur(25px);
+  animation: pulse 8s ease-in-out infinite;
+}
+
+.galaxy-1 {
+  width: 350px;
+  height: 350px;
+  top: 15%;
+  left: 8%;
+  animation-delay: 0s;
+}
+
+.galaxy-2 {
+  width: 280px;
+  height: 280px;
+  top: 65%;
+  right: 12%;
+  animation-delay: 3s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.7;
+  }
+}
