@@ -44,7 +44,7 @@ const GameBarRight: React.FC<GameBarRightProps> = ({
             className="bet-value"
             onClick={onBetMenuOpen}
           >
-            ${bet.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+            ${bet.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </button>
         </div>
         <button
@@ -59,6 +59,7 @@ const GameBarRight: React.FC<GameBarRightProps> = ({
         className={`icon-button ${autoOn ? 'active' : ''}`}
         onClick={onToggleAuto}
         title="Auto"
+        style={{ padding: '0' }}
       >
         <AutoIcon />
       </button>
@@ -67,6 +68,7 @@ const GameBarRight: React.FC<GameBarRightProps> = ({
         onClick={onSpin}
         disabled={disabled}
         title="Spin"
+        style={{ marginLeft: '4px', width: '80px', height: '80px' }}
       >
         <SpinIcon />
         {autoOn && (
@@ -79,6 +81,7 @@ const GameBarRight: React.FC<GameBarRightProps> = ({
         className={`icon-button ${turboOn ? 'active' : ''}`}
         onClick={onToggleTurbo}
         title="Turbo"
+        style={{ marginLeft: '0px', padding: '0' }}
       >
         <TurboIcon on={turboOn} />
       </button>

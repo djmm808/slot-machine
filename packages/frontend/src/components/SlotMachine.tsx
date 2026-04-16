@@ -21,12 +21,12 @@ interface Symbol {
 // Array of available symbols with unique IDs, names (emojis), and values
 // Low tier symbols (more common, lower value) - values are bet multipliers
 const symbols: Symbol[] = [
-  { id: 1, name: '☄️', value: 0.081 },
-  { id: 2, name: '⭐', value: 0.1215 },
-  { id: 3, name: '🪐', value: 0.1625 },
-  { id: 4, name: '🌙', value: 0.203 },
-  { id: 5, name: '🌞', value: 0.243 },
-  { id: 6, name: '🌌', value: 0.324 },
+  { id: 1, name: '☄️', value: 0.240 },
+  { id: 2, name: '⭐', value: 0.341 },
+  { id: 3, name: '🪐', value: 0.462 },
+  { id: 4, name: '🌙', value: 0.583 },
+  { id: 5, name: '🌞', value: 0.722 },
+  { id: 6, name: '🌌', value: 0.864 },
 ];
 
 // Multiplier symbols (rare, high impact)
@@ -35,6 +35,14 @@ const multiplierSymbols: Symbol[] = [
   { id: 101, name: '5️⃣', value: 0, isMultiplier: true, multiplier: 5 },
   { id: 102, name: '🔟', value: 0, isMultiplier: true, multiplier: 10 },
 ];
+
+// Weighted multiplier selection (more 2x, fewer 10x)
+function getRandomMultiplier(): Symbol {
+  const rand = Math.random();
+  if (rand < 0.60) return multiplierSymbols[0]; // 60% chance for 2x
+  if (rand < 0.92) return multiplierSymbols[1]; // 32% chance for 5x
+  return multiplierSymbols[2]; // 8% chance for 10x
+}
 
 // Scatter symbol (triggers free spins)
 const scatterSymbol: Symbol = {
@@ -51,9 +59,9 @@ const allSymbols = [...symbols, ...multiplierSymbols, scatterSymbol];
 const VISIBLE_SYMBOLS = 7; // Number of symbols visible on the reel
 const NUM_REELS = 7; // Number of reels (columns)
 const MAX_CASCADES = 100; // Maximum number of cascades to prevent infinite loops
-const MULTIPLIER_CHANCE = 0.003; // 0.3% chance for multiplier
-const MULTIPLIER_CHANCE_FREE_SPINS = 0.01; // 1.0% chance for multiplier during free spins
-const SCATTER_CHANCE = 0.006; // 0.6% chance for scatter
+const MULTIPLIER_CHANCE = 0.00015; // 0.015% chance for multiplier
+const MULTIPLIER_CHANCE_FREE_SPINS = 0.0085; // 0.85% chance for multiplier during free spins
+const SCATTER_CHANCE = 0.0115; // 1.15% chance for scatter
 
 // Main SlotMachine component
 interface SlotMachineProps {
@@ -73,31 +81,48 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
 
     // Create a demo grid with scatter symbols (max 1 per reel)
     const demoGrid: Symbol[][] = [];
-    let scatterCount = 0;
-    const reelsWithScatter = new Set<number>();
 
+    // First, fill the grid with random symbols
     for (let col = 0; col < NUM_REELS; col++) {
       demoGrid[col] = [];
       for (let row = 0; row < VISIBLE_SYMBOLS; row++) {
-        // Place scatter symbol in this reel if we still need more scatters and this reel doesn't have one yet
-        if (scatterCount < targetScatterCount && !reelsWithScatter.has(col) && row === 3 && Math.random() < 0.6) {
-          demoGrid[col][row] = scatterSymbol;
-          scatterCount++;
-          reelsWithScatter.add(col);
-        } else {
-          demoGrid[col][row] = generateRandomSymbol(false);
+        demoGrid[col][row] = generateRandomSymbol(false);
+      }
+    }
+
+    // Randomly select unique reels to place scatters (guarantee target count)
+    const allReels = Array.from({ length: NUM_REELS }, (_, i) => i);
+    // Shuffle the reels
+    for (let i = allReels.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allReels[i], allReels[j]] = [allReels[j], allReels[i]];
+    }
+    // Select the first targetScatterCount reels
+    const selectedReels = allReels.slice(0, targetScatterCount);
+
+    // Place scatter in a random row of each selected reel
+    selectedReels.forEach(col => {
+      const randomRow = Math.floor(Math.random() * VISIBLE_SYMBOLS);
+      demoGrid[col][randomRow] = scatterSymbol;
+    });
+
+    // Remove any existing multipliers to ensure exactly 1
+    for (let col = 0; col < NUM_REELS; col++) {
+      for (let row = 0; row < VISIBLE_SYMBOLS; row++) {
+        if (demoGrid[col][row].isMultiplier) {
+          demoGrid[col][row] = symbols[Math.floor(Math.random() * symbols.length)];
         }
       }
     }
 
-    // Add at least 1 random multiplier to the demo grid
+    // Add exactly 1 random multiplier to the demo grid
     let multiplierAdded = false;
     while (!multiplierAdded) {
       const randomCol = Math.floor(Math.random() * NUM_REELS);
       const randomRow = Math.floor(Math.random() * VISIBLE_SYMBOLS);
       // Don't replace scatter symbols
       if (!demoGrid[randomCol][randomRow].isScatter) {
-        const randomMultiplier = multiplierSymbols[Math.floor(Math.random() * multiplierSymbols.length)];
+        const randomMultiplier = getRandomMultiplier();
         demoGrid[randomCol][randomRow] = randomMultiplier;
         multiplierAdded = true;
       }
@@ -106,9 +131,9 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
     setReels(demoGrid);
 
     // Award correct free spins based on scatter count
-    const freeSpinsAwarded = getFreeSpinsFromScatters(scatterCount);
+    const freeSpinsAwarded = getFreeSpinsFromScatters(targetScatterCount);
     if (freeSpinsAwarded > 0) {
-      setScatterCountWon(scatterCount);
+      setScatterCountWon(targetScatterCount);
       setFreeSpinsWon(freeSpinsAwarded);
       setShowFreeSpinsOverlay(true);
     }
@@ -261,7 +286,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
     }
     // Chance for multiplier (higher during free spins)
     if (rand < SCATTER_CHANCE + currentMultiplierChance) {
-      return multiplierSymbols[Math.floor(Math.random() * multiplierSymbols.length)];
+      return getRandomMultiplier();
     }
     return symbols[Math.floor(Math.random() * symbols.length)];
   };
@@ -345,7 +370,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
           queue.push([c + 1, r], [c - 1, r], [c, r + 1], [c, r - 1]);
         }
 
-        if (cluster.length >= 5) {
+        if (cluster.length >= 6) {
           clusters.push({ symbol, positions: cluster });
         }
       }
@@ -602,15 +627,23 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
           setFreeSpins(prev => prev + freeSpinsAwarded);
           setFreeSpinsActive(true);
 
-          // Add at least 1 random multiplier to the grid
+          // Add exactly 1 random multiplier to the grid (remove any existing first)
           gridWithMultiplier = finalGrid.map(col => [...col]);
+          // Remove any existing multipliers to ensure exactly one
+          for (let col = 0; col < NUM_REELS; col++) {
+            for (let row = 0; row < VISIBLE_SYMBOLS; row++) {
+              if (gridWithMultiplier[col][row].isMultiplier) {
+                gridWithMultiplier[col][row] = symbols[Math.floor(Math.random() * symbols.length)];
+              }
+            }
+          }
           let multiplierAdded = false;
           while (!multiplierAdded) {
             const randomCol = Math.floor(Math.random() * NUM_REELS);
             const randomRow = Math.floor(Math.random() * VISIBLE_SYMBOLS);
             // Don't replace scatter symbols
             if (!gridWithMultiplier[randomCol][randomRow].isScatter) {
-              const randomMultiplier = multiplierSymbols[Math.floor(Math.random() * multiplierSymbols.length)];
+              const randomMultiplier = getRandomMultiplier();
               gridWithMultiplier[randomCol][randomRow] = randomMultiplier;
               multiplierAdded = true;
             }
@@ -623,10 +656,11 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
       let currentGrid = (gridWithMultiplier || finalGrid).map(col => [...col]);
       let cascadeWin = 0;
       let cascadeCount = 0;
+      let limitReachedThisSpin = false;
 
       const processCascades = async () => {
-        // Prevent infinite cascades
-        if (cascadeCount >= MAX_CASCADES) {
+        // Prevent infinite cascades and stop if limit reached
+        if (cascadeCount >= MAX_CASCADES || limitReachedThisSpin) {
           setTumbling(false);
           return;
         }
@@ -636,7 +670,15 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
         if (clusters.length > 0) {
           setTumbling(true);
           const win = calculateClusterWin(clusters, currentGrid);
-          cascadeWin += win;
+          
+          // Cap win accumulation to not exceed limit
+          const maxTotalWin = bet * 5000;
+          if (cascadeWin + win > maxTotalWin) {
+            cascadeWin = maxTotalWin;
+            limitReachedThisSpin = true;
+          } else {
+            cascadeWin += win;
+          }
           setWinAmount(cascadeWin);
           setTotalWin(cascadeWin);
 
@@ -808,7 +850,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
               </div>
             </div>
           ))}
-        </div>
+          </div>
 
         {/* Sticky Multiplier Overlay - renders separately to avoid reel animation */}
         {freeSpinsActive && (
@@ -826,7 +868,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
                     key={`sticky-overlay-${reelIndex}-${symbolIndex}`}
                     className="sticky-multiplier-cell"
                     style={{
-                      left: `${reelIndex * 114 + 6}px`,
+                      left: `${reelIndex * 95 + 6}px`,
                       top: `${symbolIndex * 85}px`,
                     }}
                   >

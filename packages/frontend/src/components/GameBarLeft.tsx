@@ -9,17 +9,19 @@ interface GameBarLeftProps {
 const GameBarLeft: React.FC<GameBarLeftProps> = ({ onMenuClick, onBonusBuyClick }) => {
   return (
     <div className="game-bar-left">
-      <button 
-        className="icon-button" 
+      <button
+        className="icon-button"
         onClick={onMenuClick}
         title="Menu"
+        style={{ width: '36px', height: '36px', padding: '0' }}
       >
         <HamburgerIcon />
       </button>
-      <button 
-        className="icon-button" 
+      <button
+        className="icon-button"
         onClick={onBonusBuyClick}
         title="Bonus Buy"
+        style={{ width: '36px', height: '36px', padding: '0' }}
       >
         <BonusIcon />
       </button>
