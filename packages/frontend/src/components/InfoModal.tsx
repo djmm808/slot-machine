@@ -16,7 +16,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
           <CloseIcon />
         </button>
         <h2 className="modal-title">GAME INFO</h2>
-        
+
         <div className="info-section">
           <h3 className="info-section-title">MAX WIN</h3>
           <div className="info-max-win">
@@ -28,7 +28,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
         <div className="info-section">
           <h3 className="info-section-title">GAME LOGIC</h3>
           <p className="info-description">
-            Match 5+ adjacent symbols (multipliers act as wilds). Cascading wins with sticky multipliers in free spins.
+            Match 6+ adjacent symbols (multipliers act as wilds). Cascading wins with sticky multipliers in free spins.
           </p>
         </div>
 
@@ -37,10 +37,9 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
           <div className="info-rtp">
             <div className="info-rtp-item">
               <span className="info-rtp-label">Combined</span>
-              <span className="info-rtp-value">95.9%</span>
+              <span className="info-rtp-value">96.07%*</span>
             </div>
           </div>
-          <p className="info-note">* 2M spin simulation</p>
         </div>
 
         <div className="info-section">
@@ -50,49 +49,49 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
               <img src="/saphire.png" alt="Sapphire" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Sapphire</span>
-                <span className="info-symbol-value">0.081x</span>
+                <span className="info-symbol-value">0.228x</span>
               </div>
             </div>
             <div className="info-symbol-item">
               <img src="/ruby.png" alt="Ruby" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Ruby</span>
-                <span className="info-symbol-value">0.122x</span>
+                <span className="info-symbol-value">0.326x</span>
               </div>
             </div>
             <div className="info-symbol-item">
               <img src="/emerald.png" alt="Emerald" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Emerald</span>
-                <span className="info-symbol-value">0.163x</span>
+                <span className="info-symbol-value">0.439x</span>
               </div>
             </div>
             <div className="info-symbol-item">
               <img src="/topaz.png" alt="Topaz" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Topaz</span>
-                <span className="info-symbol-value">0.203x</span>
+                <span className="info-symbol-value">0.558x</span>
               </div>
             </div>
             <div className="info-symbol-item">
               <img src="/quartz.png" alt="Quartz" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Quartz</span>
-                <span className="info-symbol-value">0.243x</span>
+                <span className="info-symbol-value">0.687x</span>
               </div>
             </div>
             <div className="info-symbol-item">
               <img src="/pearl.png" alt="Pearl" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Pearl</span>
-                <span className="info-symbol-value">0.324x</span>
+                <span className="info-symbol-value">0.825x</span>
               </div>
             </div>
             <div className="info-symbol-item">
               <img src="/scatter.png" alt="Scatter" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Scatter</span>
-                <span className="info-symbol-value">4-7: 10-30 FS</span>
+                <span className="info-symbol-value">3-7: 7-16 FS</span>
               </div>
             </div>
             <div className="info-symbol-item">

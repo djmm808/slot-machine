@@ -3,6 +3,7 @@ import GameHeader from './components/GameHeader';
 import GameLogo from './components/GameLogo';
 import SlotMachine, { SlotMachineRef } from './components/SlotMachine';
 import CosmicBackground from './components/CosmicBackground';
+import IntroAnimation from './components/IntroAnimation';
 
 const App: React.FC = () => {
   const slotMachineRef = useRef<SlotMachineRef>(null);
@@ -25,6 +26,7 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
+      <IntroAnimation />
       <CosmicBackground />
       <GameHeader onDemoScatter={handleDemoScatter} />
       <GameLogo />

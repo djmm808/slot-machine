@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
 import './SlotMachine.css';
 import { SymbolAsset } from './Symbols';
-import { SoundIcon, CloseIcon, InfoIcon } from './Icons';
+import { SoundIcon, CloseIcon, InfoIcon, ShieldIcon, HistoryIcon } from './Icons';
 import GameBarLeft from './GameBarLeft';
 import GameBarMiddle from './GameBarMiddle';
 import GameBarRight from './GameBarRight';
 import FreeSpinsBar from './FreeSpinsBar';
 import InfoModal from './InfoModal';
+import TumbleWinDisplay from './TumbleWinDisplay';
+import ProvablyFairModal from './ProvablyFairModal';
+import SpinHistoryModal from './SpinHistoryModal';
+import { 
+  getOrCreateClientSeed, 
+  rotateClientSeed, 
+  seededRandom, 
+  incrementNonce, 
+  getNonce
+} from '../utils/crypto';
 
 // Interface representing a symbol on the slot machine reel
 interface Symbol {
@@ -21,12 +31,12 @@ interface Symbol {
 // Array of available symbols with unique IDs, names (emojis), and values
 // Low tier symbols (more common, lower value) - values are bet multipliers
 const symbols: Symbol[] = [
-  { id: 1, name: '☄️', value: 0.240 },
-  { id: 2, name: '⭐', value: 0.341 },
-  { id: 3, name: '🪐', value: 0.462 },
-  { id: 4, name: '🌙', value: 0.583 },
-  { id: 5, name: '🌞', value: 0.722 },
-  { id: 6, name: '🌌', value: 0.864 },
+  { id: 1, name: '☄️', value: 0.228 },
+  { id: 2, name: '⭐', value: 0.326 },
+  { id: 3, name: '🪐', value: 0.439 },
+  { id: 4, name: '🌙', value: 0.558 },
+  { id: 5, name: '🌞', value: 0.687 },
+  { id: 6, name: '🌌', value: 0.825 },
 ];
 
 // Multiplier symbols (rare, high impact)
@@ -59,9 +69,9 @@ const allSymbols = [...symbols, ...multiplierSymbols, scatterSymbol];
 const VISIBLE_SYMBOLS = 7; // Number of symbols visible on the reel
 const NUM_REELS = 7; // Number of reels (columns)
 const MAX_CASCADES = 100; // Maximum number of cascades to prevent infinite loops
-const MULTIPLIER_CHANCE = 0.00015; // 0.015% chance for multiplier
-const MULTIPLIER_CHANCE_FREE_SPINS = 0.0085; // 0.85% chance for multiplier during free spins
-const SCATTER_CHANCE = 0.0115; // 1.15% chance for scatter
+const MULTIPLIER_CHANCE = 0.00009; // 0.009% chance for multiplier
+const MULTIPLIER_CHANCE_FREE_SPINS = 0.0022; // 0.22% chance for multiplier during free spins (adjusted for 96% RTP)
+const SCATTER_CHANCE = 0.0084; // 0.84% chance for scatter (adjusted for target RTP)
 
 // Main SlotMachine component
 interface SlotMachineProps {
@@ -76,8 +86,8 @@ export interface SlotMachineRef {
 const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemoScatter, onFreeSpinsChange }, ref) => {
   // Function to trigger demo scatter
   const handleDemoScatter = () => {
-    // Random scatter count between 4 and 7
-    const targetScatterCount = Math.floor(Math.random() * 4) + 4; // 4, 5, 6, or 7
+    // Random scatter count between 3 and 7
+    const targetScatterCount = Math.floor(Math.random() * 5) + 3; // 3, 4, 5, 6, or 7
 
     // Create a demo grid with scatter symbols (max 1 per reel)
     const demoGrid: Symbol[][] = [];
@@ -168,6 +178,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
   const [droppingPositions, setDroppingPositions] = useState<Set<string>>(new Set());
   const [clusterWins, setClusterWins] = useState<number[]>([]);
   const [currentTumbleWin, setCurrentTumbleWin] = useState(0);
+  const [currentClusterPositions, setCurrentClusterPositions] = useState<[number, number][]>([]);
   const [gridVersion, setGridVersion] = useState(0);
   const [slidingPositions, setSlidingPositions] = useState<Set<string>>(new Set());
   const [freeSpins, setFreeSpins] = useState(0);
@@ -182,6 +193,15 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
   const [bonusBuyOpen, setBonusBuyOpen] = useState(false);
   const [showRetriggerOverlay, setShowRetriggerOverlay] = useState(false);
   const [retriggerSpinsWon, setRetriggerSpinsWon] = useState(0);
+  
+  // Provably fair state (simplified)
+  const [clientSeed, setClientSeed] = useState('');
+  const [nonce, setNonce] = useState(0);
+  const [provablyFairOpen, setProvablyFairOpen] = useState(false);
+  
+  // Spin history state
+  const [spinHistory, setSpinHistory] = useState<Array<{ nonce: number; bet: number; win: number; timestamp: number }>>([]);
+  const [spinHistoryOpen, setSpinHistoryOpen] = useState(false);
 
   // Handle overlay dismiss and start autoplay
   const handleOverlayDismiss = () => {
@@ -395,10 +415,11 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
   // Function to determine free spins based on scatter count
   const getFreeSpinsFromScatters = (scatterCount: number): number => {
     switch (scatterCount) {
-      case 4: return 10;
-      case 5: return 12;
-      case 6: return 15;
-      case 7: return 30;
+      case 3: return 7;
+      case 4: return 9;
+      case 5: return 11;
+      case 6: return 13;
+      case 7: return 16;
       default: return 0;
     }
   };
@@ -522,6 +543,26 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
   // Get position key for tracking
   const getPositionKey = (col: number, row: number) => `${col}-${row}`;
 
+  // Initialize provably fair seed on component mount
+  useEffect(() => {
+    initializeSeed();
+  }, []);
+
+  // Initialize client seed from localStorage
+  const initializeSeed = async () => {
+    const seed = await getOrCreateClientSeed();
+    const currentNonce = getNonce();
+    setClientSeed(seed);
+    setNonce(currentNonce);
+  };
+
+  // Rotate seed (generate new client seed and reset nonce)
+  const rotateSeed = async () => {
+    const newSeed = await rotateClientSeed();
+    setClientSeed(newSeed);
+    setNonce(0);
+  };
+
   // Function to handle the spin action
   const spin = async () => {
     // Prevent spin if balance is insufficient (unless in free spins) or the machine is already spinning
@@ -543,6 +584,11 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
     setSlidingPositions(new Set());
     setClusterWins([]);
     setCurrentTumbleWin(0);
+    setCurrentClusterPositions([]);
+
+    // Increment nonce for this spin
+    const currentNonce = incrementNonce();
+    setNonce(currentNonce);
 
     try {
       // Set spinning animation state
@@ -617,8 +663,8 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
       const freeSpinsAwarded = getFreeSpinsFromScatters(scatterCount);
       let gridWithMultiplier: Symbol[][] | null = null;
       if (freeSpinsAwarded > 0) {
-        if (freeSpinsActive && scatterCount >= 4) {
-          // During free spins, 4+ scatters award retrigger
+        if (freeSpinsActive && scatterCount >= 3) {
+          // During free spins, 3+ scatters award retrigger
           setAutoSpinning(false);
           setRetriggerSpinsWon(freeSpinsAwarded);
           setShowRetriggerOverlay(true);
@@ -626,6 +672,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
           // Initial free spin award - guarantee at least 1 multiplier
           setFreeSpins(prev => prev + freeSpinsAwarded);
           setFreeSpinsActive(true);
+          setLimitReached(false);
 
           // Add exactly 1 random multiplier to the grid (remove any existing first)
           gridWithMultiplier = finalGrid.map(col => [...col]);
@@ -670,7 +717,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
         if (clusters.length > 0) {
           setTumbling(true);
           const win = calculateClusterWin(clusters, currentGrid);
-          
+
           // Cap win accumulation to not exceed limit
           const maxTotalWin = bet * 5000;
           if (cascadeWin + win > maxTotalWin) {
@@ -689,6 +736,7 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
           // Step 1: Highlight winning clusters and show win amount
           setHighlightedPositions(positionKeys);
           setCurrentTumbleWin(win);
+          setCurrentClusterPositions(allPositions);
           setClusterWins(prev => [...prev, win]);
           await new Promise(resolve => setTimeout(resolve, turboOn ? 200 : 600));
 
@@ -715,11 +763,20 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
           setDroppingPositions(new Set());
           setSlidingPositions(new Set());
 
+          // If limit reached, stop cascading and end free spins immediately
+          if (limitReachedThisSpin) {
+            setTumbling(false);
+            setCurrentTumbleWin(0);
+            setCurrentClusterPositions([]);
+            return;
+          }
+
           cascadeCount++;
           await processCascades();
         } else {
           setTumbling(false);
           setCurrentTumbleWin(0);
+          setCurrentClusterPositions([]);
         }
       };
 
@@ -732,18 +789,27 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
         setBalance(prevBalance => prevBalance + finalWin);
         setWinAmount(finalWin);
         // Check if win was capped (limit reached)
-        setLimitReached(cascadeWin > maxTotalWin);
-        // Track total win during free spins
+        const limitReached = cascadeWin > maxTotalWin;
+        setLimitReached(limitReached);
+        // Track total win during free spins (capped at 5000x bet)
         if (freeSpinsActive) {
-          setFreeSpinsTotalWin(prev => prev + finalWin);
+          setFreeSpinsTotalWin(prev => Math.min(prev + finalWin, maxTotalWin));
+          // If limit reached, end free spins immediately
+          if (limitReached) {
+            setFreeSpins(0);
+            setFreeSpinsActive(false);
+            setAutoSpinning(false);
+            setShowFreeSpinsCompleteOverlay(true);
+          }
         }
       } else {
         setLimitReached(false);
       }
       setCurrentTumbleWin(0);
+      setCurrentClusterPositions([]);
 
-      // Handle free spins decrement
-      if (freeSpinsActive) {
+      // Handle free spins decrement (only if not already ended by limit)
+      if (freeSpinsActive && !limitReached) {
         setFreeSpins(prev => {
           const newFreeSpins = prev - 1;
           if (newFreeSpins <= 0) {
@@ -753,6 +819,14 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
           return newFreeSpins;
         });
       }
+
+      // Add to spin history
+      setSpinHistory(prev => [...prev, {
+        nonce: currentNonce,
+        bet: freeSpinsActive ? 0 : bet,
+        win: finalWin,
+        timestamp: Date.now()
+      }]);
     } catch (error) {
       // Handle any errors during the spin
       console.error('Error:', error);
@@ -852,6 +926,9 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
           ))}
           </div>
 
+        {/* Win Popup Overlay */}
+        <TumbleWinDisplay currentTumbleWin={currentTumbleWin} clusterPositions={currentClusterPositions} />
+
         {/* Sticky Multiplier Overlay - renders separately to avoid reel animation */}
         {freeSpinsActive && (
           <div className="sticky-multiplier-overlay">
@@ -896,8 +973,10 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
             <div className="free-spins-complete-content">
               <div className="free-spins-complete-title">FREE SPINS COMPLETE</div>
               <div className="free-spins-complete-win-label">{totalFreeSpinsAwarded} SPINS PLAYED</div>
-              <div className="free-spins-complete-subtitle">TOTAL WIN</div>
-              <div className="free-spins-complete-win-amount">${freeSpinsTotalWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <div className="free-spins-complete-subtitle">{limitReached ? 'LIMIT REACHED' : 'TOTAL WIN'}</div>
+              <div className="free-spins-complete-win-amount">
+                {limitReached ? '5,000x MAX' : `$${freeSpinsTotalWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              </div>
               <div className="free-spins-complete-subtitle" style={{marginTop: '8px'}}>PRESS ANYWHERE TO CONTINUE</div>
             </div>
           </div>
@@ -998,6 +1077,26 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
               <SoundIcon on={soundOn} />
               <span>Sound</span>
             </button>
+            <button
+              className="hamburger-menu-item"
+              onClick={() => {
+                setHamburgerOpen(false);
+                setProvablyFairOpen(true);
+              }}
+            >
+              <ShieldIcon />
+              <span>Provably Fair</span>
+            </button>
+            <button
+              className="hamburger-menu-item"
+              onClick={() => {
+                setHamburgerOpen(false);
+                setSpinHistoryOpen(true);
+              }}
+            >
+              <HistoryIcon />
+              <span>Spin History</span>
+            </button>
           </div>
         </div>
       )}
@@ -1043,7 +1142,32 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
                 setFreeSpinsActive(true);
                 setAutoSpinning(true);
                 setFreeSpinsTotalWin(0);
+                setLimitReached(false);
                 setBonusBuyOpen(false);
+                
+                // Generate initial grid with exactly 1 guaranteed multiplier
+                const initialGrid = Array(NUM_REELS).fill(null).map(() =>
+                  generateReelSymbols(VISIBLE_SYMBOLS, true)
+                );
+                // Remove any existing multipliers
+                for (let col = 0; col < NUM_REELS; col++) {
+                  for (let row = 0; row < VISIBLE_SYMBOLS; row++) {
+                    if (initialGrid[col][row].isMultiplier) {
+                      initialGrid[col][row] = symbols[Math.floor(Math.random() * symbols.length)];
+                    }
+                  }
+                }
+                // Add exactly 1 random multiplier
+                let multiplierAdded = false;
+                while (!multiplierAdded) {
+                  const randomCol = Math.floor(Math.random() * NUM_REELS);
+                  const randomRow = Math.floor(Math.random() * VISIBLE_SYMBOLS);
+                  if (!initialGrid[randomCol][randomRow].isScatter) {
+                    initialGrid[randomCol][randomRow] = getRandomMultiplier();
+                    multiplierAdded = true;
+                  }
+                }
+                setReels(initialGrid);
               }}
             >
               <div className="bonus-buy-option-name">10 FREE SPINS</div>
@@ -1059,7 +1183,32 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
                 setFreeSpinsActive(true);
                 setAutoSpinning(true);
                 setFreeSpinsTotalWin(0);
+                setLimitReached(false);
                 setBonusBuyOpen(false);
+                
+                // Generate initial grid with exactly 1 guaranteed multiplier
+                const initialGrid = Array(NUM_REELS).fill(null).map(() =>
+                  generateReelSymbols(VISIBLE_SYMBOLS, true)
+                );
+                // Remove any existing multipliers
+                for (let col = 0; col < NUM_REELS; col++) {
+                  for (let row = 0; row < VISIBLE_SYMBOLS; row++) {
+                    if (initialGrid[col][row].isMultiplier) {
+                      initialGrid[col][row] = symbols[Math.floor(Math.random() * symbols.length)];
+                    }
+                  }
+                }
+                // Add exactly 1 random multiplier
+                let multiplierAdded = false;
+                while (!multiplierAdded) {
+                  const randomCol = Math.floor(Math.random() * NUM_REELS);
+                  const randomRow = Math.floor(Math.random() * VISIBLE_SYMBOLS);
+                  if (!initialGrid[randomCol][randomRow].isScatter) {
+                    initialGrid[randomCol][randomRow] = getRandomMultiplier();
+                    multiplierAdded = true;
+                  }
+                }
+                setReels(initialGrid);
               }}
             >
               <div className="bonus-buy-option-name">15 FREE SPINS</div>
@@ -1071,6 +1220,22 @@ const SlotMachine = React.forwardRef<SlotMachineRef, SlotMachineProps>(({ onDemo
 
       {/* Info Modal */}
       <InfoModal isOpen={infoOpen} onClose={() => setInfoOpen(false)} />
+
+      {/* Provably Fair Modal */}
+      <ProvablyFairModal
+        isOpen={provablyFairOpen}
+        onClose={() => setProvablyFairOpen(false)}
+        onSeedRotate={rotateSeed}
+        clientSeed={clientSeed}
+        nonce={nonce}
+      />
+
+      {/* Spin History Modal */}
+      <SpinHistoryModal
+        isOpen={spinHistoryOpen}
+        onClose={() => setSpinHistoryOpen(false)}
+        history={spinHistory}
+      />
     </div>
   );
 });
