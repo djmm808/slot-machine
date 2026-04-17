@@ -6,9 +6,10 @@ interface GameBarMiddleProps {
   freeSpinsTotalWin?: number;
   freeSpinsActive?: boolean;
   limitReached?: boolean;
+  anteBetActive?: boolean;
 }
 
-const GameBarMiddle: React.FC<GameBarMiddleProps> = ({ balance, winAmount, freeSpinsTotalWin = 0, freeSpinsActive = false, limitReached = false }) => {
+const GameBarMiddle: React.FC<GameBarMiddleProps> = ({ balance, winAmount, freeSpinsTotalWin = 0, freeSpinsActive = false, limitReached = false, anteBetActive = false }) => {
   const displayWin = freeSpinsActive ? freeSpinsTotalWin : winAmount;
   const displayWinText = limitReached ? 'Limit Reached' : `$${displayWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const shouldShowWin = displayWin > 0 || limitReached;
@@ -18,6 +19,7 @@ const GameBarMiddle: React.FC<GameBarMiddleProps> = ({ balance, winAmount, freeS
       <div className="game-bar-balance">
         <span className="balance-label">Balance</span>
         <span className="balance-value">${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        {anteBetActive && <span className="ante-badge">ANTE</span>}
       </div>
       {shouldShowWin && (
         <div className="game-bar-win">

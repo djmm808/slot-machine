@@ -46,70 +46,70 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
           <h3 className="info-section-title">PAYTABLE</h3>
           <div className="info-symbols-grid">
             <div className="info-symbol-item">
-              <img src="/saphire.png" alt="Sapphire" className="info-symbol-image" />
+              <img src="/saphire2.png" alt="Sapphire" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Sapphire</span>
                 <span className="info-symbol-value">0.228x</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/ruby.png" alt="Ruby" className="info-symbol-image" />
+              <img src="/ruby2.png" alt="Ruby" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Ruby</span>
                 <span className="info-symbol-value">0.326x</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/emerald.png" alt="Emerald" className="info-symbol-image" />
+              <img src="/emerald2.png" alt="Emerald" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Emerald</span>
                 <span className="info-symbol-value">0.439x</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/topaz.png" alt="Topaz" className="info-symbol-image" />
+              <img src="/topaz2.png" alt="Topaz" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Topaz</span>
                 <span className="info-symbol-value">0.558x</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/quartz.png" alt="Quartz" className="info-symbol-image" />
+              <img src="/quartz2.png" alt="Quartz" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Quartz</span>
                 <span className="info-symbol-value">0.687x</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/pearl.png" alt="Pearl" className="info-symbol-image" />
+              <img src="/pearl2.png" alt="Pearl" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Pearl</span>
                 <span className="info-symbol-value">0.825x</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/scatter.png" alt="Scatter" className="info-symbol-image" />
+              <img src="/scatter2.png" alt="Scatter" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">Scatter</span>
-                <span className="info-symbol-value">3-7: 7-16 FS</span>
+                <span className="info-symbol-value">3-4: 10-12 FS</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/2x.png" alt="2x" className="info-symbol-image" />
+              <img src="/2x2.png" alt="2x" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">2x Wild</span>
                 <span className="info-symbol-value">Sticky in FS</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/5x.png" alt="5x" className="info-symbol-image" />
+              <img src="/5x2.png" alt="5x" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">5x Wild</span>
                 <span className="info-symbol-value">Sticky in FS</span>
               </div>
             </div>
             <div className="info-symbol-item">
-              <img src="/10x.png" alt="10x" className="info-symbol-image" />
+              <img src="/10x2.png" alt="10x" className="info-symbol-image" />
               <div className="info-symbol-details">
                 <span className="info-symbol-name">10x Wild</span>
                 <span className="info-symbol-value">Sticky in FS</span>

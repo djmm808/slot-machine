@@ -3,49 +3,49 @@ import React from 'react';
 // Individual Symbol Components as PNG images
 
 export const SaphireSymbol = () => (
-  <img src="/saphire.png" alt="Sapphire" width="60" height="60" />
+  <img src="/saphire2.png" alt="Sapphire" width="80" height="80" />
 );
 
 export const RubySymbol = () => (
-  <img src="/ruby.png" alt="Ruby" width="60" height="60" />
+  <img src="/ruby2.png" alt="Ruby" width="80" height="80" />
 );
 
 export const EmeraldSymbol = () => (
-  <img src="/emerald.png" alt="Emerald" width="60" height="60" />
+  <img src="/emerald2.png" alt="Emerald" width="80" height="80" />
 );
 
 export const TopazSymbol = () => (
-  <img src="/topaz.png" alt="Topaz" width="60" height="60" />
+  <img src="/topaz2.png" alt="Topaz" width="80" height="80" />
 );
 
 export const QuartzSymbol = () => (
-  <img src="/quartz.png" alt="Quartz" width="60" height="60" />
+  <img src="/quartz2.png" alt="Quartz" width="80" height="80" />
 );
 
 export const PearlSymbol = () => (
-  <img src="/pearl.png" alt="Pearl" width="60" height="60" />
+  <img src="/pearl2.png" alt="Pearl" width="80" height="80" />
 );
 
 // Multiplier Symbols
 
 export const Multiplier2x = () => (
-  <img src="/2x.png" alt="2x" width="60" height="60" />
+  <img src="/2x2.png" alt="2x" width="80" height="80" />
 );
 
 export const Multiplier5x = () => (
-  <img src="/5x.png" alt="5x" width="60" height="60" />
+  <img src="/5x2.png" alt="5x" width="80" height="80" />
 );
 
 export const Multiplier10x = () => (
-  <img src="/10x.png" alt="10x" width="60" height="60" />
+  <img src="/10x2.png" alt="10x" width="80" height="80" />
 );
 
 export const Multiplier50x = () => (
-  <img src="/10x.png" alt="50x" width="60" height="60" />
+  <img src="/10x2.png" alt="50x" width="80" height="80" />
 );
 
 export const ScatterSymbol = () => (
-  <img src="/scatter.png" alt="Scatter" width="80" height="80" />
+  <img src="/scatter2.png" alt="Scatter" width="80" height="80" />
 );
 
 // Symbol mapping component
@@ -56,12 +56,12 @@ interface SymbolAssetProps {
 
 export const SymbolAsset: React.FC<SymbolAssetProps> = ({ symbolId, className }) => {
   const symbolMap: { [key: number]: React.FC } = {
-    1: SaphireSymbol,
-    2: RubySymbol,
-    3: EmeraldSymbol,
-    4: TopazSymbol,
-    5: QuartzSymbol,
-    6: PearlSymbol,
+    0: SaphireSymbol,
+    1: RubySymbol,
+    2: EmeraldSymbol,
+    3: TopazSymbol,
+    4: QuartzSymbol,
+    5: PearlSymbol,
     100: Multiplier2x,
     101: Multiplier5x,
     102: Multiplier10x,

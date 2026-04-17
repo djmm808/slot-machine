@@ -28,6 +28,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({ onDemoScatter }) => {
       <span className="game-time">{currentTime}</span>
       <span className="time-separator">|</span>
       <span className="game-title">Cosmic Gems</span>
+      <span className="mega-logo">MEGA</span>
       {onDemoScatter && (
         <button className="header-demo-btn" onClick={onDemoScatter}>
           Demo Scatter

@@ -6,21 +6,21 @@ const IntroAnimation: React.FC = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
-    // Simulate slower loading progress
+    // Simulate faster loading progress
     const progressInterval = setInterval(() => {
       setLoadingProgress(prev => {
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + Math.random() * 5;
+        return prev + Math.random() * 8;
       });
-    }, 150);
+    }, 120);
 
-    // Hide intro after loading completes (slower)
+    // Hide intro after loading completes (faster)
     const timer = setTimeout(() => {
       setShowIntro(false);
-    }, 5000);
+    }, 3500);
 
     return () => {
       clearInterval(progressInterval);
@@ -34,7 +34,9 @@ const IntroAnimation: React.FC = () => {
     <div className="intro-animation">
       <div className="intro-content">
         <div className="intro-logo">MEGA</div>
-        <div className="loading-spinner"></div>
+        <div className="loading-bar-container">
+          <div className="loading-bar" style={{ width: `${Math.min(loadingProgress, 100)}%` }}></div>
+        </div>
         <div className="loading-progress">{Math.floor(Math.min(loadingProgress, 100))}%</div>
       </div>
     </div>

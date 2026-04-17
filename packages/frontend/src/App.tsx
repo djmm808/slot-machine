@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
 import GameHeader from './components/GameHeader';
-import GameLogo from './components/GameLogo';
 import SlotMachine, { SlotMachineRef } from './components/SlotMachine';
 import CosmicBackground from './components/CosmicBackground';
 import IntroAnimation from './components/IntroAnimation';
@@ -29,7 +28,6 @@ const App: React.FC = () => {
       <IntroAnimation />
       <CosmicBackground />
       <GameHeader onDemoScatter={handleDemoScatter} />
-      <GameLogo />
       <SlotMachine ref={slotMachineRef} onFreeSpinsChange={setFreeSpinsActive} />
     </div>
   );

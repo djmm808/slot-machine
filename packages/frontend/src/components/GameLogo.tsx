@@ -1,11 +1,13 @@
 import React from 'react';
 
-// Game logo - MEGA text in top right corner
+// Game logo - cosmicgemslogoclear.png displayed to the left, outside, top-aligned of game board
 const GameLogo: React.FC = () => {
   return (
-    <div className="game-logo">
-      MEGA
-    </div>
+    <img 
+      src="/cosmicgemslogoclear.png" 
+      alt="Cosmic Gems" 
+      className="game-logo"
+    />
   );
 };
 

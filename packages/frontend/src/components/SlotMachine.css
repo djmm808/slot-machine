@@ -19,7 +19,19 @@
   padding: 20px 24px 40px;
   position: relative;
   height: 90vh;
-  overflow: hidden;
+  z-index: 10;
+}
+
+/* Game Logo - cosmicgemslogoclear.png positioned top center between board and top of page */
+.game-logo {
+  position: absolute;
+  left: 50%;
+  top: 1px;
+  transform: translateX(-50%);
+  height: 140px;
+  width: auto;
+  object-fit: contain;
+  z-index: 1001;
 }
 
 /* Wrapper for reels and overlay to enable absolute positioning */
@@ -28,6 +40,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+}
+
+.game-board-wrapper.fading {
+  opacity: 0;
+  transform: scale(0.95);
 }
 
 /* Sticky Multiplier Overlay */
@@ -43,8 +61,8 @@
 
 .sticky-multiplier-cell {
   position: absolute;
-  width: 95px;
-  height: 85px;
+  width: 112px;
+  height: 102px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -85,9 +103,8 @@
 /* Free Spins Display Bar - Game Bar Style */
 .free-spins-display {
   position: absolute;
-  top: -50px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: -80px;
+  right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -104,11 +121,11 @@
 
 @keyframes free-spins-bar-slide-in {
   from {
-    transform: translateX(-50%) translateY(-20px);
+    transform: translateY(-20px);
     opacity: 0;
   }
   to {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
@@ -131,7 +148,7 @@
 .tumble-win-display {
   position: absolute;
   top: -60px;
-  right: -160px;
+  right: -180px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -196,7 +213,7 @@
 .reels {
   display: flex;
   gap: 0;
-  padding: 6px;
+  padding: 4px;
   background: #1a1a1a;
   border-radius: 12px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
@@ -204,8 +221,8 @@
 }
 
 .reel {
-  width: 95px;
-  height: 600px;
+  width: 112px;
+  height: 720px;
   overflow: hidden;
   border: none;
   border-radius: 0;
@@ -221,7 +238,7 @@
 
 .symbol-cell {
   width: 100%;
-  height: 85px;
+  height: 102px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -231,8 +248,8 @@
 }
 
 .symbol-asset {
-  width: 85px;
-  height: 85px;
+  width: 100px;
+  height: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -326,11 +343,11 @@
 @keyframes drop-in {
   0% {
     opacity: 0;
-    transform: translateY(-85px);
+    transform: translateY(-102px);
   }
   70% {
     opacity: 1;
-    transform: translateY(5px);
+    transform: translateY(6px);
   }
   85% {
     transform: translateY(-2px);
@@ -344,7 +361,7 @@
 @keyframes slide-down {
   0% {
     opacity: 0;
-    transform: translateY(-85px);
+    transform: translateY(-102px);
   }
   100% {
     opacity: 1;
@@ -361,7 +378,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 800px;
+  width: 792px;
   height: 80px;
   background: #1a1a1a;
   border-radius: 12px;
@@ -391,6 +408,17 @@
   justify-content: center;
   gap: 4px;
   height: 100%;
+}
+
+.ante-badge {
+  font-size: 8px;
+  font-weight: 700;
+  color: #00E5FF;
+  background: rgba(0, 229, 255, 0.15);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  border-radius: 3px;
+  padding: 1px 4px;
+  letter-spacing: 0.5px;
 }
 
 .game-bar-win {
@@ -632,7 +660,7 @@
 .hamburger-popup {
   position: fixed;
   bottom: 140px;
-  left: calc(50% - 400px);
+  left: calc(50% - 396px);
   width: 180px;
   background: #1a1a1a;
   border-radius: 12px;
@@ -813,7 +841,7 @@
 .bet-popup {
   position: fixed;
   bottom: 140px;
-  right: calc(50% - 200px);
+  right: calc(50% - 196px);
   width: 200px;
   background: #1a1a1a;
   border-radius: 12px;
@@ -882,7 +910,7 @@
 .bonus-buy-popup {
   position: fixed;
   bottom: 140px;
-  left: calc(50% - 400px);
+  left: calc(50% - 396px);
   width: 220px;
   background: #1a1a1a;
   border-radius: 12px;
@@ -897,7 +925,7 @@
 .auto-spin-popup {
   position: fixed;
   bottom: 140px;
-  left: calc(50% + 240px);
+  left: calc(50% + 236px);
   width: 140px;
   background: #1a1a1a;
   border-radius: 12px;
@@ -1009,17 +1037,28 @@
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-.bonus-buy-option-name {
+.bet-value {
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
   letter-spacing: 0.5px;
 }
 
+.bet-value.ante-active {
+  color: #00E5FF;
+}
+
 .bonus-buy-option-price {
   font-size: 10px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.6);
+}
+
+.bonus-buy-option-desc {
+  font-size: 9px;
+  font-weight: 400;
+  color: rgba(0, 229, 255, 0.7);
+  letter-spacing: 0.3px;
 }
 
 /* Free Spins Overlay */

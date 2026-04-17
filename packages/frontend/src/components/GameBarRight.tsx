@@ -7,6 +7,7 @@ interface GameBarRightProps {
   autoOn: boolean;
   autoBetSpins: number | string;
   bet: number;
+  anteBetActive: boolean;
   onSpin: () => void;
   onToggleTurbo: () => void;
   onToggleAuto: () => void;
@@ -21,6 +22,7 @@ const GameBarRight: React.FC<GameBarRightProps> = ({
   autoOn,
   autoBetSpins,
   bet,
+  anteBetActive,
   onSpin,
   onToggleTurbo,
   onToggleAuto,
@@ -28,6 +30,7 @@ const GameBarRight: React.FC<GameBarRightProps> = ({
   onBetMenuOpen,
   disabled
 }) => {
+  const effectiveBet = anteBetActive ? bet * 1.25 : bet;
   return (
     <div className="game-bar-right">
       <div className="bet-controls">
@@ -41,10 +44,10 @@ const GameBarRight: React.FC<GameBarRightProps> = ({
         <div className="bet-value-wrapper">
           <span className="bet-label">Bet</span>
           <button
-            className="bet-value"
+            className={`bet-value ${anteBetActive ? 'ante-active' : ''}`}
             onClick={onBetMenuOpen}
           >
-            ${bet.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            ${effectiveBet.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </button>
         </div>
         <button
